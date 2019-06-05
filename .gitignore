@@ -1,0 +1,7 @@
+logs/*
+logs/
+*.pyc
+*.log
+*.dat
+benchmark/data/*
+benchmark/data/
