@@ -27,6 +27,10 @@ while True:
     payload2 = ''
     for i in range(buffer):
         payload2 += payload
-        
+
     for conn in conns:
         conn.send(payload2)
+
+# while True:
+#     for conn in conns:
+#         conn.send(payload)

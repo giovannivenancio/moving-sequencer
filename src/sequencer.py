@@ -50,6 +50,13 @@ class Sequencer():
             for conn in replica_conn:
                 conn.send(d)
 
+        # while True:
+        #     d = client_conn.recv()
+        #     counter += 1
+        #
+        #     for conn in replica_conn:
+        #         conn.send(d)
+
     def mainloop(self):
         """Node waits to receive the sequencer token from failure detector.
 

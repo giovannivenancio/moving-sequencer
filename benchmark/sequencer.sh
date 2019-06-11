@@ -29,7 +29,7 @@ for num_exec in $(seq 1 $ROUNDS); do
     repl_port=9001
     for repl in $(seq 1 $NUM_REPLICAS); do
         echo "starting replica on port $repl_port"
-        python replica.py $repl ../benchmark/tx.log $TEST_DURATION $repl_port $BUFFER   &
+        python replica.py $repl ../benchmark/tx.log $TEST_DURATION $repl_port $BUFFER &
         repl_addresses="$repl_addresses 192.168.100.4:$repl_port "
         repl_port=$((repl_port+1))
     done
@@ -44,23 +44,7 @@ for num_exec in $(seq 1 $ROUNDS); do
         pid=$((pid+1))
     done
 
-    # docker_addresses=""
-    # docker_host=2
-    # pid=0
-    # for seq_id in $(seq 0 $NUM_SEQUENCERS); do
-    #     echo "starting sequencer with pid $pid"
-    #     python sequencer.py $pid $BUFFER $repl_addresses &
-    #     docker_addresses="$docker_addresses 192.168.100.4:8000 "
-    #     pid=$((pid+1))
-    # done
-
-    echo $docker_addresses
-    sleep 3
-    # sudo ./kill.sh
-    # exit 5
-
     echo "starting failure detector"
-    #python fd.py 192.168.100.4:8000 &
     python fd.py $docker_addresses &
 
     sleep 1
@@ -71,7 +55,6 @@ for num_exec in $(seq 1 $ROUNDS); do
     echo "starting client"
     #python client.py $docker_addresses &
     python client.py $BATCH_SIZE 172.17.0.2:8002 &
-    #python client.py $BATCH_SIZE 192.168.100.4:8002 &
     echo "sleeping..."
     sleep $TEST_DURATION
 
