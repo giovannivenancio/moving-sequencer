@@ -11,8 +11,9 @@ class Sequencer():
     Sequencer class used on moving sequencers.
     """
 
-    def __init__(self, pid, replicas):
+    def __init__(self, pid, buffer, replicas):
         self._pid = pid
+        self._buffer = buffer
         self.replicas = replicas
         self.queue = Queue()
 
@@ -22,7 +23,7 @@ class Sequencer():
         # FD <-> Sequencer
         self._fd_seq_ucast_conn = create_conn('pair', 'server', None, self._fd_seq_ucast_port)
 
-    def _broadcast(self, pid, client_seq_ucast_port, replicas, counter, queue):
+    def _broadcast(self, pid, client_seq_ucast_port, buffer, replicas, counter, queue):
         """Creates a process with the sequencer role.
         Receives packets and broadcasts it to replicas."""
 
@@ -40,9 +41,14 @@ class Sequencer():
         replica_conn = [create_conn('pair', 'client', repl.split(':')[0], repl.split(':')[1]) for repl in replicas]
 
         while True:
-            counter += 1
+            d = ''
+
+            for i in range(buffer):
+                d = client_conn.recv()
+                counter += 1
+
             for conn in replica_conn:
-                conn.send(client_conn.recv())
+                conn.send(d)
 
     def mainloop(self):
         """Node waits to receive the sequencer token from failure detector.
@@ -67,16 +73,34 @@ class Sequencer():
             if token == self._pid:
                 print "Node %s has the sequencer role." % self._pid
 
-                # initialize broacasting process
+                #initialize broacasting process
                 p_bcast = Process(
                     target=self._broadcast,
                     args=(
                         self._pid,
                         self._client_seq_ucast_port,
+                        self._buffer,
                         self.replicas,
                         counter,
                         self.queue))
                 p_bcast.start()
+
+                #########################
+
+                # client_conn = create_conn('pair', 'server', None, self._client_seq_ucast_port)
+                # replica_conn = [create_conn('pair', 'client', repl.split(':')[0], repl.split(':')[1]) for repl in self.replicas]
+                #
+                # while True:
+                #     d = ''
+                #     # send requests in batch
+                #     for i in range(self._buffer):
+                #         d += client_conn.recv()
+                #         counter += 1
+                #
+                #     for conn in replica_conn:
+                #         conn.send(d)
+
+                #########################
 
                 # receive a request to give up on sequencer role
                 self._fd_seq_ucast_conn.recv()
@@ -96,6 +120,7 @@ if __name__ == '__main__':
         exit(1)
 
     pid = sys.argv[1]
+    buffer = int(sys.argv[2])
 
-    seq = Sequencer(pid, sys.argv[2:])
+    seq = Sequencer(pid, buffer, sys.argv[3:])
     seq.mainloop()

@@ -58,10 +58,10 @@ class Performance():
         """Create a bandwidth snapshot."""
 
         return {
-            'net_in': psutil.net_io_counters().bytes_recv,
-            'net_out': psutil.net_io_counters().bytes_sent,
-            'packet_in': psutil.net_io_counters().packets_recv,
-            'packet_out': psutil.net_io_counters().packets_sent
+            'net_in': psutil.net_io_counters(pernic=True)['docker0'].bytes_recv,
+            'net_out': psutil.net_io_counters(pernic=True)['docker0'].bytes_sent,
+            'packet_in': psutil.net_io_counters(pernic=True)['docker0'].packets_recv,
+            'packet_out': psutil.net_io_counters(pernic=True)['docker0'].packets_sent
         }
 
     def eval_bandwidth(self, snap_ini, snap_final, time_interval, num_replicas):

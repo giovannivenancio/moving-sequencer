@@ -17,7 +17,7 @@ buffer = int(sys.argv[5])
 def exit_handler(*args):
     if counter:
         with open(log_file, 'a') as f:
-            f.write(str(counter/time_interval) + ' ' + str((latency*1000)/counter) + '\n')
+            f.write(str(counter/time_interval) + ' ' + str(latency*1000/counter) + '\n')
     sys.exit(0)
 
 signal(SIGTERM, exit_handler)

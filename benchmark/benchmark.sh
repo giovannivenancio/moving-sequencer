@@ -8,8 +8,9 @@ TEST_DURATION=$2
 BATCH_SIZE=512
 
 # cleanup
-rm -f ../logs/*
+rm -f ../logs/n_*.log
 rm data/throughput.dat
+rm data/latency.dat
 
 # n = 1
 sudo ./sequencer.sh 0 1 $BATCH_SIZE $TEST_DURATION $ROUNDS ../logs/n_1.log
@@ -35,29 +36,50 @@ sudo ./sequencer.sh 0 64 $BATCH_SIZE $TEST_DURATION $ROUNDS ../logs/n_64.log
 # get averages
 
 echo "n = 1"
-avg=$(cat ../logs/n_1.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "1 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_1.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_1.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_1.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "1 $throughout_avg" >> data/throughput.dat
+echo "1 $latency_avg" >> data/latency.dat
 
 echo "n = 2"
-avg=$(cat ../logs/n_2.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "2 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_2.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_2.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_2.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "2 $throughout_avg" >> data/throughput.dat
+echo "2 $latency_avg" >> data/latency.dat
 
 echo "n = 4"
-avg=$(cat ../logs/n_4.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "4 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_4.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_4.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_4.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "4 $throughout_avg" >> data/throughput.dat
+echo "4 $latency_avg" >> data/latency.dat
 
 echo "n = 8"
-avg=$(cat ../logs/n_8.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "8 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_8.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_8.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_8.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "8 $throughout_avg" >> data/throughput.dat
+echo "8 $latency_avg" >> data/latency.dat
 
 echo "n = 16"
-avg=$(cat ../logs/n_16.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "16 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_16.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_16.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_16.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "16 $throughout_avg" >> data/throughput.dat
+echo "16 $latency_avg" >> data/latency.dat
 
 echo "n = 32"
-avg=$(cat ../logs/n_32.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "32 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_32.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_32.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_32.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "32 $throughout_avg" >> data/throughput.dat
+echo "32 $latency_avg" >> data/latency.dat
 
 echo "n = 64"
-avg=$(cat ../logs/n_64.log | grep "out_avg" | grep -v "per" | awk '{print $2}' | python get_average.py)
-echo "64 $avg" >> data/throughput.dat
+#throughout_avg=$(cat ../logs/n_64.log | grep "packet_in" | grep -v "per" | awk '{print $2}' | python get_average.py)
+throughout_avg=$(cat ../logs/n_64.log | grep "tx/s" | awk '{print $3}' | python get_average.py)
+latency_avg=$(cat ../logs/n_64.log | grep "latency" | awk '{print $5}' | python get_average.py)
+echo "64 $throughout_avg" >> data/throughput.dat
+echo "64 $latency_avg" >> data/latency.dat

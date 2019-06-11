@@ -6,4 +6,4 @@ import sys
 
 values = [float(value.strip('\n')) for value in sys.stdin]
 avg = sum(values)/len(values)
-print int(avg)
+print avg
