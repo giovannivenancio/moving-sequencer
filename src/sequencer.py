@@ -30,9 +30,17 @@ class Sequencer():
         def exit_handler(*args):
             # update sequencer counter
             queue.put(counter)
+
+            # close remaining connections
+            for conn in replica_conn:
+                conn.close()
+            client_conn.close()
+
             sys.exit(0)
 
         signal(SIGTERM, exit_handler)
+
+        print "%s creating connections" % pid
 
         # Client <-> Sequencer
         client_conn = create_conn('pair', 'server', None, client_seq_ucast_port)
@@ -40,11 +48,13 @@ class Sequencer():
         # Sequencer <-> Replicas
         replica_conn = [create_conn('pair', 'client', repl.split(':')[0], repl.split(':')[1]) for repl in replicas]
 
+        print "waiting to send"
+
         while True:
             d = ''
 
             for i in range(buffer):
-                d = client_conn.recv()
+                d += client_conn.recv()
                 counter += 1
 
             for conn in replica_conn:
@@ -91,23 +101,6 @@ class Sequencer():
                         counter,
                         self.queue))
                 p_bcast.start()
-
-                #########################
-
-                # client_conn = create_conn('pair', 'server', None, self._client_seq_ucast_port)
-                # replica_conn = [create_conn('pair', 'client', repl.split(':')[0], repl.split(':')[1]) for repl in self.replicas]
-                #
-                # while True:
-                #     d = ''
-                #     # send requests in batch
-                #     for i in range(self._buffer):
-                #         d += client_conn.recv()
-                #         counter += 1
-                #
-                #     for conn in replica_conn:
-                #         conn.send(d)
-
-                #########################
 
                 # receive a request to give up on sequencer role
                 self._fd_seq_ucast_conn.recv()

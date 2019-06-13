@@ -27,6 +27,7 @@ socket = context.socket(zmq.PAIR)
 socket.bind("tcp://192.168.100.4:%s" % port)
 
 counter = 0
+counter2 = 0
 latency = 0
 
 print "listening on port", port
@@ -40,6 +41,10 @@ if id == "1":
         end = timer()
         latency += (end - start) #sec
         counter += buffer
+        counter2 += 1
+
+        if counter2 % 10000 == 0:
+            print "replica:", counter
 else:
     while True:
         socket.recv()

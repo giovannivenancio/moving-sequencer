@@ -25,6 +25,8 @@ for num_exec in $(seq 1 $ROUNDS); do
     echo "removing containers"
     docker rm $(docker ps -a | awk '{print $1}' | grep -v -i cont)
 
+    rm metrics.log
+
     repl_addresses=""
     repl_port=9001
     for repl in $(seq 1 $NUM_REPLICAS); do
@@ -35,26 +37,28 @@ for num_exec in $(seq 1 $ROUNDS); do
     done
 
     docker_addresses=""
+    cli_docker_addresses=""
     docker_host=2
     pid=0
     for seq_id in $(seq 0 $NUM_SEQUENCERS); do
         echo "starting sequencer with pid $pid"
-        docker run -d -v /home/gvsouza/Projects/moving-sequencer:/moving-sequencer -it gvsouza/moving-sequencer /bin/bash -c "python /moving-sequencer/src/sequencer.py $pid $BUFFER $repl_addresses"
+        docker run -d -v /home/gvsouza/Projects/moving-sequencer:/moving-sequencer -it gvsouza/moving-sequencer /bin/bash -c "python /moving-sequencer/src/sequencer.py $pid $BUFFER $repl_addresses &> /moving-sequencer/output_$pid.log"
         docker_addresses="$docker_addresses 172.17.0.$((docker_host+pid)):8000 "
+        cli_docker_addresses="$cli_docker_addresses 172.17.0.$((docker_host+pid)):8002 "
         pid=$((pid+1))
     done
 
     echo "starting failure detector"
-    python fd.py $docker_addresses &
+    sudo python fd.py $docker_addresses &
 
-    sleep 1
+    sleep 10
 
     echo "snapshoting bandwidth"
     snap1=$(python -c "from utils import Performance; p = Performance(); print p.get_bandwidth_snapshot()")
 
-    echo "starting client"
-    #python client.py $docker_addresses &
-    python client.py $BATCH_SIZE 172.17.0.2:8002 &
+    echo "starting client on $cli_docker_addresses"
+    python client.py $BATCH_SIZE $cli_docker_addresses &
+    #python client.py $BATCH_SIZE 172.17.0.2:8002 &
     echo "sleeping..."
     sleep $TEST_DURATION
 
