@@ -42,7 +42,8 @@ for num_exec in $(seq 1 $ROUNDS); do
     pid=0
     for seq_id in $(seq 0 $NUM_SEQUENCERS); do
         echo "starting sequencer with pid $pid"
-        docker run -d -v /home/gvsouza/Projects/moving-sequencer:/moving-sequencer -it gvsouza/moving-sequencer /bin/bash -c "python /moving-sequencer/src/sequencer.py $pid $BUFFER $repl_addresses &> /moving-sequencer/output_$pid.log"
+        docker run -d -v /home/gvsouza/Projects/moving-sequencer:/moving-sequencer -it gvsouza/moving-sequencer /bin/bash -c "python /moving-sequencer/src/sequencer.py $pid $BUFFER $repl_addresses"
+        # &> /moving-sequencer/output_$pid.log
         docker_addresses="$docker_addresses 172.17.0.$((docker_host+pid)):8000 "
         cli_docker_addresses="$cli_docker_addresses 172.17.0.$((docker_host+pid)):8002 "
         pid=$((pid+1))

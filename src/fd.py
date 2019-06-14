@@ -41,12 +41,7 @@ class FailureDetector():
         elif action == 'remove':
             del self._sequencers[pid]
             del self._seq_addr[pid]
-
-    def choose_sequencer(self):
-        """Based on resource usage or failure detection, choose
-        a new node to receive the sequencer role."""
-
-        pass
+            del performance_metrics[ip]
 
     def update_token(self, pid, counter):
         """Upon choosing a new sequencer node, send the token."""
@@ -62,18 +57,24 @@ class FailureDetector():
         updated_counter = self._sequencers[pid].recv()
         return updated_counter
 
+    def ping(self, ip):
+        """Test if node server is up and running."""
+
+        return not os.system("ping -q -c 1 -W 2 %s > /dev/null 2>&1" % ip)
+
     def performance_monitoring(self):
         """Collect metrics from the sequencer pool."""
 
         global performance_metrics
-        performance_metrics = {}
 
         while True:
+            performance_metrics = {}
             with open('metrics.log', 'r') as f_cpu:
                 cpu_usage_values = f_cpu.readlines()[-1].replace('\n', '').split(';')[:-1]
                 for value in cpu_usage_values:
-                    ip, cpu_usage = value.split(' ')
-                    performance_metrics[ip] = float(cpu_usage.strip('%'))
+                    if value:
+                        ip, cpu_usage = value.split(' ')
+                        performance_metrics[ip] = float(cpu_usage.strip('%'))
             time.sleep(1)
 
     def mainloop(self):
@@ -86,15 +87,27 @@ class FailureDetector():
         print "sending token to %s" % pid
         self.update_token(pid, self._counter)
 
+        # monitors sequencer node
         while True:
             print performance_metrics
-            #print self._seq_addr
-            #print "########### %s > %s ?? ##########" % (performance_metrics[self._seq_addr[pid]], self._cpu_threshold)
-            # monitors sequencer node
-            if performance_metrics[self._seq_addr[pid]] > self._cpu_threshold:
+
+            faulty = False
+            node_ip = self._seq_addr[pid]
+
+            # node has crashed
+            if not self.ping(node_ip):
+                print "removing %s from metrics and sequencer list" % node_ip
+                self.update_sequencers(str(pid), node_ip, None, 'remove')
+                faulty = True
+
+            if faulty or performance_metrics[node_ip] > self._cpu_threshold:
                 print "releasing node %s" % pid
+
                 # release node from sequencer role
-                self._counter = self.revoke(pid)
+                if faulty:
+                    self._counter = 0
+                else:
+                    self._counter = self.revoke(pid)
 
                 # choose another node
                 pid = self._seq_addr.keys()[self._seq_addr.values().index(min(performance_metrics, key=performance_metrics.get))]
