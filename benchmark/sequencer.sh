@@ -26,6 +26,7 @@ for num_exec in $(seq 1 $ROUNDS); do
     docker rm $(docker ps -a | awk '{print $1}' | grep -v -i cont)
 
     rm metrics.log
+    rm ../benchmark/replica.log
 
     repl_addresses=""
     repl_port=9001
@@ -76,7 +77,10 @@ for num_exec in $(seq 1 $ROUNDS); do
     python -c "from utils import Performance; p = Performance(); p.eval_bandwidth($snap1, $snap2, $TEST_DURATION, $NUM_REPLICAS)" >> $LOG_FILE
     echo "tx/s = "$(tail -n1 ../benchmark/tx.log | awk '{print $1}') >> $LOG_FILE
     echo "avg latency (msec) = "$(tail -n1 ../benchmark/tx.log | awk '{print $2}') >> $LOG_FILE
-    echo -e "\n" >> $LOG_FILE
+
+    if [ "$NUM_SEQUENCERS" -gt 0 ]; then
+      echo "over time: "$(cat ../benchmark/replica.log | python ../benchmark/get_tx_over_time.py) >> $LOG_FILE
+    fi
 
 done
 

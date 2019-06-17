@@ -18,6 +18,11 @@ def exit_handler(*args):
     if counter:
         with open(log_file, 'a') as f:
             f.write(str(counter/time_interval) + ' ' + str((latency*1000)/counter) + '\n')
+    try:
+        f_faults.close()
+    except:
+        pass
+
     sys.exit(0)
 
 signal(SIGTERM, exit_handler)
@@ -27,13 +32,14 @@ socket = context.socket(zmq.PAIR)
 socket.bind("tcp://192.168.100.4:%s" % port)
 
 counter = 0
-counter2 = 0
 latency = 0
 
 print "listening on port", port
 
 if id == "1":
+    f_faults = open('../benchmark/replica.log', 'w')
     socket.recv()
+    init = timer()
     counter += 1
     while True:
         start = timer()
@@ -41,10 +47,7 @@ if id == "1":
         end = timer()
         latency += (end - start) #sec
         counter += buffer
-        counter2 += 1
-
-        if counter2 % 10000 == 0:
-            print "replica:", counter
+        f_faults.write(str(end-init) + ' ' + str(counter) + '\n')
 else:
     while True:
         socket.recv()

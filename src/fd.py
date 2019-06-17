@@ -20,7 +20,7 @@ class FailureDetector():
         self._seq_addr = {}
         self._counter = 0
 
-        self._cpu_threshold = 95
+        self._cpu_threshold = 995
 
         perf_thread = threading.Thread(target=self.performance_monitoring)
         perf_thread.start()
