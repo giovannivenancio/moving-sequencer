@@ -60,9 +60,11 @@ for num_exec in $(seq 1 $ROUNDS); do
 
     echo "starting client on $cli_docker_addresses"
     python client.py $BATCH_SIZE $cli_docker_addresses &
-    #python client.py $BATCH_SIZE 172.17.0.2:8002 &
-    echo "sleeping..."
-    sleep $TEST_DURATION
+
+    for slp in $(seq 0 $TEST_DURATION); do
+      echo "sleeping... $slp"
+      sleep 1
+    done
 
     echo "terminating client"
     sudo pkill -f client.py

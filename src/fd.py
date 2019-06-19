@@ -20,7 +20,7 @@ class FailureDetector():
         self._seq_addr = {}
         self._counter = 0
 
-        self._cpu_threshold = 995
+        self._cpu_threshold = 130
 
         perf_thread = threading.Thread(target=self.performance_monitoring)
         perf_thread.start()
@@ -41,7 +41,7 @@ class FailureDetector():
         elif action == 'remove':
             del self._sequencers[pid]
             del self._seq_addr[pid]
-            del performance_metrics[ip]
+            #del performance_metrics[ip]
 
     def update_token(self, pid, counter):
         """Upon choosing a new sequencer node, send the token."""
@@ -86,10 +86,12 @@ class FailureDetector():
         pid = "0"
         print "sending token to %s" % pid
         self.update_token(pid, self._counter)
+        num_monitors = 0
 
         # monitors sequencer node
         while True:
-            print performance_metrics
+            num_monitors += 1
+            print num_monitors, performance_metrics
 
             faulty = False
             node_ip = self._seq_addr[pid]

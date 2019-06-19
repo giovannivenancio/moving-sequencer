@@ -8,11 +8,10 @@ while true ; do
       container_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $container_id)
       cpu_usage=$(docker stats --no-stream | grep $container_id | awk '{print $3}')
 
-      if [ -z "$cpu_usage" ]; then
-        cpu_usage=999%
+      if [ ! -z "$container_ip" ] && [ ! -z "$cpu_usage" ]; then
+        resource_usage="$container_ip $cpu_usage;$resource_usage"
       fi
 
-      resource_usage="$container_ip $cpu_usage;$resource_usage"
   done
 
   echo $resource_usage >> metrics.log )
